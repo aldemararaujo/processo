@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raciocínio Clínico em Medicina Vascular | Usina de Pesquisa</title>
+<meta name="description" content="Roteiro estruturado e interativo de raciocínio clínico em Angiologia e Cirurgia Vascular, com calculadoras de ITB e escore de Wells, classificações CEAP, Fontaine e Rutherford, caso modelo e matriz de autoavaliação.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ECF0F3;
+    --surface:#FFFFFF;
+    --surface-2:#F4F7F9;
+    --ink:#14202B;
+    --ink-soft:#51606E;
+    --ink-faint:#8593A0;
+    --arterial:#A81B33;
+    --arterial-bright:#E03651;
+    --venous:#1C5560;
+    --venous-soft:#2E7C88;
+    --line:#D4DBE2;
+    --line-strong:#BCC6CF;
+    --grid:rgba(20,32,43,.05);
+    --radius:14px;
+    --radius-sm:8px;
+    --maxw:1080px;
+    --shadow:0 1px 2px rgba(20,32,43,.04),0 8px 28px rgba(20,32,43,.07);
+    --shadow-sm:0 1px 2px rgba(20,32,43,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:"Spectral",Georgia,serif;font-weight:700;line-height:1.15;letter-spacing:-.01em;color:var(--ink)}
+  p{margin:0 0 1em}
+  a{color:var(--venous)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-ligatures:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- top nav ---------- */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(236,240,243,.82);backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+  .topbar__inner{max-width:var(--maxw);margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:18px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;white-space:nowrap}
+  .brand__mark{width:26px;height:26px;flex:0 0 auto}
+  .navlinks{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+  .navlinks::-webkit-scrollbar{display:none}
+  .navlinks a{font-size:13.5px;color:var(--ink-soft);text-decoration:none;padding:7px 11px;border-radius:999px;white-space:nowrap;font-weight:500}
+  .navlinks a:hover{color:var(--ink);background:var(--surface)}
+  .navlinks a.active{color:var(--arterial);background:var(--surface);box-shadow:var(--shadow-sm)}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:
+    linear-gradient(180deg,#fff 0%,var(--surface-2) 100%)}
+  .hero__grid{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;opacity:.7;mask-image:linear-gradient(180deg,#000,transparent)}
+  .hero__inner{position:relative;max-width:var(--maxw);margin:0 auto;padding:60px 24px 30px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--venous);font-weight:500;margin-bottom:22px}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--arterial-bright);box-shadow:0 0 0 4px rgba(224,54,81,.16)}
+  .hero h1{font-size:clamp(2.3rem,6vw,4rem);font-weight:800;margin:0 0 .2em;max-width:16ch}
+  .hero__sub{font-family:"Spectral",serif;font-style:italic;font-weight:500;font-size:clamp(1.1rem,2.4vw,1.5rem);color:var(--venous);margin:0 0 1.1em}
+  .hero__lead{font-size:1.08rem;color:var(--ink-soft);max-width:60ch}
+  .hero__meta{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13.5px;color:var(--ink-soft);padding-top:20px;border-top:1px solid var(--line)}
+  .hero__meta b{color:var(--ink);font-weight:600}
+
+  /* pulse trace signature */
+  .pulse{margin:34px 0 6px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden}
+  .pulse svg{display:block;width:100%;height:110px}
+  .pulse__trace{fill:none;stroke:var(--arterial);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .pulse__lead{stroke:var(--arterial-bright);stroke-width:3}
+  .pulse__panf{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;fill:var(--ink-faint)}
+  @keyframes trace{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+  .pulse__lead{stroke-dasharray:90 1310;animation:trace 4.2s linear infinite}
+  @media (prefers-reduced-motion:reduce){.pulse__lead{animation:none;stroke-dasharray:none;opacity:.0}}
+
+  /* ---------- generic section ---------- */
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  .sec-head{margin-bottom:34px}
+  .sec-head .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--arterial);font-weight:500;display:block;margin-bottom:10px}
+  .sec-head h2{font-size:clamp(1.6rem,3.4vw,2.3rem);font-weight:700;margin:0 0 .35em}
+  .sec-head p{color:var(--ink-soft);max-width:64ch;margin:0}
+  .lead-note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--venous);border-radius:var(--radius-sm);padding:18px 22px;color:var(--ink-soft);font-size:15.5px;box-shadow:var(--shadow-sm)}
+
+  /* ---------- roteiro / stepper ---------- */
+  .steps{display:flex;flex-direction:column;gap:14px}
+  .step{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .2s,border-color .2s}
+  .step[open]{box-shadow:var(--shadow);border-color:var(--line-strong)}
+  .step summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:18px;padding:20px 22px;user-select:none}
+  .step summary::-webkit-details-marker{display:none}
+  .step__num{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:#fff;background:var(--ink);min-width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .step[open] .step__num{background:var(--arterial)}
+  .step__t{flex:1}
+  .step__t h3{font-size:1.18rem;margin:0;font-weight:600}
+  .step__t span{font-size:13px;color:var(--ink-faint)}
+  .step__chev{flex:0 0 auto;color:var(--ink-faint);transition:transform .2s}
+  .step[open] .step__chev{transform:rotate(180deg)}
+  .step__body{padding:2px 22px 24px;border-top:1px solid var(--line);margin-top:-2px}
+  .step__body p:first-child{margin-top:14px}
+  .step__body h4{font-size:.82rem;font-family:"IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--venous);font-weight:600;margin:18px 0 8px}
+  .step__body ul{margin:0 0 8px;padding-left:1.1em}
+  .step__body li{margin-bottom:5px}
+  .step__body li::marker{color:var(--arterial)}
+
+  .callout{border-radius:var(--radius-sm);padding:14px 16px;margin:14px 0;font-size:15px;border:1px solid}
+  .callout--key{background:#fdf3f5;border-color:#f3cdd5;color:#7a1226}
+  .callout--key b{color:var(--arterial)}
+  .callout--tip{background:#eef6f7;border-color:#cbe3e6;color:#114a52}
+
+  .ref-pill{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--venous);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;text-decoration:none;font-weight:500;vertical-align:middle}
+  .ref-pill:hover{border-color:var(--venous-soft);color:var(--ink)}
+
+  /* ---------- matriz 3x3 + painel navegável ---------- */
+  .matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+  @media (max-width:820px){.matrix{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:520px){.matrix{grid-template-columns:1fr}}
+  .mcard{font-family:inherit;text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:17px 18px 15px;display:flex;flex-direction:column;gap:8px;color:var(--ink);transition:transform .16s,box-shadow .16s,border-color .16s}
+  .mcard:hover{border-color:var(--line-strong);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .mcard[aria-selected="true"]{border-left-color:var(--arterial);box-shadow:var(--shadow)}
+  .mcard--env[aria-selected="true"]{border-left-color:var(--venous)}
+  .mcard__top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .mcard__num{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:#fff;background:var(--ink);min-width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .mcard[aria-selected="true"] .mcard__num{background:var(--arterial)}
+  .mcard--env[aria-selected="true"] .mcard__num{background:var(--venous)}
+  .mcard__verb{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .mcard__title{font-family:"Spectral",serif;font-weight:700;font-size:1.08rem;line-height:1.16;color:var(--ink)}
+  .mcard__desc{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+
+  .epanel{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);box-shadow:var(--shadow);padding:0 28px 28px;scroll-margin-top:78px}
+  .epanel:focus{outline:none}
+  .epanel:focus-visible{outline:2px solid var(--venous-soft);outline-offset:2px}
+  .epanel__head{display:flex;align-items:center;gap:16px;padding:22px 0 16px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .epanel__num{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;color:#fff;background:var(--arterial);min-width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .epanel__num--env{background:var(--venous)}
+  .epanel__head h3{margin:0;font-size:1.42rem;line-height:1.1}
+  .epanel__verb{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--venous)}
+  .epanel__body p:first-child{margin-top:16px}
+  .epanel__body h4{font-size:.82rem;font-family:"IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--venous);font-weight:600;margin:18px 0 8px}
+  .epanel__body ul{margin:0 0 8px;padding-left:1.1em}
+  .epanel__body li{margin-bottom:5px}
+  .epanel__body li::marker{color:var(--arterial)}
+
+  /* ---------- tools ---------- */
+  .tools-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}
+  .tool{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column}
+  .tool__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+  .tool h3{font-size:1.2rem;margin:0;font-weight:700}
+  .tool__tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .tool__desc{font-size:14px;color:var(--ink-soft);margin:0 0 16px}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .field label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .field input,.field select{font-family:"IBM Plex Mono",monospace;font-size:15px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink)}
+  .field input:focus,.field select:focus{outline:2px solid var(--venous-soft);outline-offset:1px;border-color:var(--venous-soft)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .readout{margin-top:6px;border-top:1px dashed var(--line-strong);padding-top:16px}
+  .readout__val{font-family:"IBM Plex Mono",monospace;font-size:2rem;font-weight:600;line-height:1;color:var(--ink)}
+  .readout__lab{font-size:13px;color:var(--ink-faint);margin-top:4px}
+  .badge{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid transparent}
+  .badge.is-normal{background:#eaf5ee;color:#1c6b3a;border-color:#bfe2cc}
+  .badge.is-warn{background:#fdf6e8;color:#8a5a08;border-color:#f0dcb0}
+  .badge.is-alert{background:#fdeef0;color:#9a1631;border-color:#f1c6cf}
+  .badge.is-neutral{background:var(--surface-2);color:var(--ink-soft);border-color:var(--line)}
+
+  .check-list{display:flex;flex-direction:column;gap:2px;margin:0 0 4px}
+  .check-item{display:flex;align-items:flex-start;gap:11px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:14.5px}
+  .check-item:hover{background:var(--surface-2)}
+  .check-item input{margin-top:3px;width:17px;height:17px;accent-color:var(--arterial);flex:0 0 auto}
+  .check-item span small{display:block;color:var(--ink-faint);font-size:12px}
+  .check-item .pts{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);white-space:nowrap}
+
+  /* reference tables */
+  .refscale{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:18px}
+  .refscale__h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .refscale__h h3{margin:0;font-size:1.1rem}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;padding:10px 20px;border-bottom:1px solid var(--line)}
+  tbody td{padding:10px 20px;border-bottom:1px solid var(--surface-2);vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--surface-2)}
+  td .code{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--arterial)}
+  td .codev{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--venous)}
+
+  /* model case */
+  .case{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+  .case>summary{list-style:none;cursor:pointer;padding:22px 24px;display:flex;align-items:center;gap:14px}
+  .case>summary::-webkit-details-marker{display:none}
+  .case>summary h3{margin:0;font-size:1.25rem}
+  .case__body{padding:4px 24px 26px;border-top:1px solid var(--line)}
+  .case__body h4{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--arterial);margin:22px 0 6px}
+  .case__body h4:first-child{margin-top:16px}
+  .vitals{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+  .vital{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:4px 9px;color:var(--ink-soft)}
+
+  /* rubric */
+  .rubric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:24px}
+  .meter{height:10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:8px 0 4px}
+  .meter__fill{height:100%;width:0;background:linear-gradient(90deg,var(--venous),var(--arterial));transition:width .35s ease}
+  .meter__txt{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);display:flex;justify-content:space-between}
+
+  /* competencies */
+  .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media (max-width:860px){.comp-grid{grid-template-columns:1fr}}
+  .comp{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:22px;border-top:3px solid var(--venous)}
+  .comp:nth-child(2){border-top-color:var(--arterial)}
+  .comp:nth-child(3){border-top-color:var(--venous-soft)}
+  .comp h3{font-size:1.05rem;margin:0 0 4px}
+  .comp .dom{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:12px}
+  .comp ul{margin:0;padding-left:1.1em;font-size:14.5px}
+  .comp li{margin-bottom:7px}
+  .comp li::marker{color:var(--arterial)}
+
+  /* team chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--ink-soft);box-shadow:var(--shadow-sm)}
+  .chips--alt .chip{border-color:#cbe3e6;color:var(--venous)}
+
+  /* atlas */
+  .atlas{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media (max-width:860px){.atlas{grid-template-columns:1fr}}
+  figure.plate{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+  figure.plate svg{display:block;width:100%;height:200px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+  figure.plate figcaption{padding:14px 16px}
+  figure.plate figcaption b{display:block;font-family:"Spectral",serif;font-size:1rem;margin-bottom:3px}
+  figure.plate figcaption span{font-size:13px;color:var(--ink-soft)}
+  .atlas-note{margin-top:16px;font-size:13.5px;color:var(--ink-faint)}
+
+  /* disclosure + refs */
+  .disclosure{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ink-faint);border-radius:var(--radius-sm);padding:18px 22px;font-size:14.5px;color:var(--ink-soft);margin-bottom:30px}
+  .reflist{list-style:none;counter-reset:r;padding:0;margin:0;font-size:14px}
+  .reflist li{counter-increment:r;padding:12px 0 12px 40px;border-bottom:1px solid var(--line);position:relative;color:var(--ink-soft)}
+  .reflist li::before{content:counter(r);position:absolute;left:0;top:12px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:#fff;background:var(--venous);width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+  .reflist li:last-child{border-bottom:none}
+  .reflist a{color:var(--venous);word-break:break-word}
+
+  /* utility bar */
+  .actionbar{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .btn{font-family:"IBM Plex Sans",sans-serif;font-size:14px;font-weight:600;border-radius:var(--radius-sm);padding:11px 18px;cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+  .btn:hover{border-color:var(--venous-soft)}
+  .btn--solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn--solid:hover{background:#000}
+  .btn:focus-visible,a:focus-visible,summary:focus-visible,.check-item:focus-within{outline:2px solid var(--venous-soft);outline-offset:2px}
+
+  /* footer */
+  footer{padding:48px 0 60px;border-bottom:none;background:var(--surface-2)}
+  .foot{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start}
+  .foot__brand{display:flex;align-items:center;gap:12px}
+  .foot__brand b{font-family:"Spectral",serif;font-size:1.05rem}
+  .foot small{color:var(--ink-faint);font-size:12.5px;display:block;line-height:1.7}
+
+  @media print{
+    .topbar,.pulse,.actionbar,.hero__grid,.matrix,.epanel{display:none}
+    .case,details{box-shadow:none}
+    body{background:#fff;font-size:12px}
+    section{padding:18px 0;page-break-inside:avoid}
+    .case__body{display:block!important}
+    #eixoStore{display:block!important}
+    #eixoStore [data-content]{page-break-inside:avoid;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;padding:0 16px 14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP NAV ============ -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <span class="brand">
+      <svg class="brand__mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#14202B"/>
+        <path d="M5 17h4l2-6 3 11 3-13 2.5 8H27" stroke="#E03651" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Usina de Pesquisa
+    </span>
+    <nav class="navlinks" aria-label="Seções">
+      <a href="#roteiro">Roteiro</a>
+      <a href="#ferramentas">Ferramentas</a>
+      <a href="#escalas">Escalas</a>
+      <a href="#caso">Caso modelo</a>
+      <a href="#rubrica">Autoavaliação</a>
+      <a href="#competencias">Competências</a>
+      <a href="#equipe">Equipe</a>
+      <a href="#atlas">Atlas</a>
+      <a href="#referencias">Referências</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <span class="eyebrow"><span class="dot"></span>Angiologia e Cirurgia Vascular &middot; UNCISAL</span>
+    <h1>Raciocínio Clínico em Medicina Vascular</h1>
+    <p class="hero__sub">Estruturando e sistematizando a realidade</p>
+    <p class="hero__lead">Roteiro de raciocínio que organiza a abordagem de qualquer cenário vascular em nove eixos sequenciais, do acolhimento à conduta, integrando as classificações validadas da especialidade, ferramentas de cálculo à beira do leito e uma matriz de autoavaliação. Concebido como instrumento de ensino para estudantes de Medicina.</p>
+
+    <div class="pulse" aria-hidden="true">
+      <svg viewBox="0 0 1000 110" preserveAspectRatio="none">
+        <text x="14" y="20" class="pulse__panf">DOPPLER &middot; ONDA ARTERIAL TRIFÁSICA</text>
+        <path class="pulse__trace" id="wave" d="M0,70 L120,70 Q150,70 160,40 Q168,18 180,60 Q188,84 200,72 L210,70 L330,70 Q360,70 370,40 Q378,18 390,60 Q398,84 410,72 L420,70 L540,70 Q570,70 580,40 Q588,18 600,60 Q608,84 620,72 L630,70 L750,70 Q780,70 790,40 Q798,18 810,60 Q818,84 830,72 L840,70 L1000,70"/>
+        <path class="pulse__trace pulse__lead" d="M0,70 L120,70 Q150,70 160,40 Q168,18 180,60 Q188,84 200,72 L210,70 L330,70 Q360,70 370,40 Q378,18 390,60 Q398,84 410,72 L420,70 L540,70 Q570,70 580,40 Q588,18 600,60 Q608,84 620,72 L630,70 L750,70 Q780,70 790,40 Q798,18 810,60 Q818,84 830,72 L840,70 L1000,70"/>
+      </svg>
+    </div>
+
+    <div class="hero__meta">
+      <span><b>Disciplina</b> &nbsp;Medicina Vascular</span>
+      <span><b>Público</b> &nbsp;Graduação em Medicina</span>
+      <span><b>Método</b> &nbsp;Aprendizagem baseada em problemas</span>
+      <span><b>Autor</b> &nbsp;Aldemar Araujo Castro</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ COMO USAR ============ -->
+<section id="usar" aria-labelledby="usar-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Orientação</span>
+      <h2 id="usar-h">Como utilizar este roteiro</h2>
+      <p>O roteiro percorre o método clínico clássico na ordem em que o pensamento diagnóstico se constrói. Cada eixo é uma etapa de raciocínio, não apenas um campo a preencher. Recomenda-se trabalhar do primeiro ao nono eixo na sequência, retornando livremente para revisão.</p>
+    </div>
+    <div class="lead-note">
+      Os verbos de comando em cada eixo, como estruturar, descrever, justificar e indicar, sinalizam o produto cognitivo esperado do estudante. As ferramentas interativas e as escalas de referência convertem o raciocínio em medidas objetivas, e a matriz de autoavaliação ao final permite verificar a completude do próprio percurso.
+      <div class="actionbar">
+        <button class="btn btn--solid" onclick="window.print()">Imprimir ou exportar em PDF</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROTEIRO ============ -->
+<section id="roteiro" aria-labelledby="roteiro-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">O Roteiro &middot; nove eixos</span>
+      <h2 id="roteiro-h">Estrutura do raciocínio clínico</h2>
+      <p>A sequência reproduz com fidelidade o método clínico e progride de forma encadeada, da anamnese à prevenção e seguimento, fechada por uma discussão didática e pela articulação multidisciplinar.</p>
+    </div>
+
+    <div class="matrix" id="matrix" role="tablist" aria-label="Eixos do roteiro clínico">
+      <button class="mcard" role="tab" id="tab-1" aria-controls="epanel" aria-selected="true" data-eixo="1"><span class="mcard__top"><span class="mcard__num">01</span><span class="mcard__verb">Estruture</span></span><span class="mcard__title">Anamnese</span><span class="mcard__desc">Identificação, queixa, história e antecedentes</span></button>
+      <button class="mcard" role="tab" id="tab-2" aria-controls="epanel" aria-selected="false" data-eixo="2" tabindex="-1"><span class="mcard__top"><span class="mcard__num">02</span><span class="mcard__verb">Descreva</span></span><span class="mcard__title">Exame físico</span><span class="mcard__desc">Geral, sinais vitais e semiologia vascular</span></button>
+      <button class="mcard" role="tab" id="tab-3" aria-controls="epanel" aria-selected="false" data-eixo="3" tabindex="-1"><span class="mcard__top"><span class="mcard__num">03</span><span class="mcard__verb">Liste</span></span><span class="mcard__title">Hipóteses diagnósticas</span><span class="mcard__desc">Probabilidades pré-teste em três planos</span></button>
+      <button class="mcard" role="tab" id="tab-4" aria-controls="epanel" aria-selected="false" data-eixo="4" tabindex="-1"><span class="mcard__top"><span class="mcard__num">04</span><span class="mcard__verb">Justifique</span></span><span class="mcard__title">Diagnóstico diferencial</span><span class="mcard__desc">Exclusão sistemática por categorias</span></button>
+      <button class="mcard" role="tab" id="tab-5" aria-controls="epanel" aria-selected="false" data-eixo="5" tabindex="-1"><span class="mcard__top"><span class="mcard__num">05</span><span class="mcard__verb">Indique</span></span><span class="mcard__title">Exames complementares</span><span class="mcard__desc">Da triagem não invasiva à imagem</span></button>
+      <button class="mcard" role="tab" id="tab-6" aria-controls="epanel" aria-selected="false" data-eixo="6" tabindex="-1"><span class="mcard__top"><span class="mcard__num">06</span><span class="mcard__verb">Estruture</span></span><span class="mcard__title">Conduta</span><span class="mcard__desc">Inicial, definitiva e de suporte</span></button>
+      <button class="mcard mcard--env" role="tab" id="tab-7" aria-controls="epanel" aria-selected="false" data-eixo="7" tabindex="-1"><span class="mcard__top"><span class="mcard__num">07</span><span class="mcard__verb">Apresente</span></span><span class="mcard__title">Prevenção e seguimento</span><span class="mcard__desc">Prevenção, recorrência e acompanhamento</span></button>
+      <button class="mcard mcard--env" role="tab" id="tab-8" aria-controls="epanel" aria-selected="false" data-eixo="8" tabindex="-1"><span class="mcard__top"><span class="mcard__num">08</span><span class="mcard__verb">Aprofunde</span></span><span class="mcard__title">Discussão didática</span><span class="mcard__desc">Fisiopatologia, armadilhas e impacto</span></button>
+      <button class="mcard mcard--env" role="tab" id="tab-9" aria-controls="epanel" aria-selected="false" data-eixo="9" tabindex="-1"><span class="mcard__top"><span class="mcard__num">09</span><span class="mcard__verb">Identifique</span></span><span class="mcard__title">Interação multidisciplinar</span><span class="mcard__desc">Articulação do cuidado</span></button>
+    </div>
+
+    <div class="epanel" id="epanel" role="tabpanel" aria-labelledby="tab-1" tabindex="-1"></div>
+
+    <div id="eixoStore" hidden>
+      <div data-content="1">
+        <div class="epanel__head"><span class="epanel__num">01</span><div><h3>Anamnese</h3><span class="epanel__verb">Estruture</span></div></div>
+        <div class="epanel__body">
+          <p><b>Estruture</b> a anamnese nas quatro partes canônicas, qualificando e cronologizando cada sintoma.</p>
+          <h4>Identificação e queixa</h4>
+          <ul>
+            <li>Idade, sexo, ocupação e procedência, com atenção a fatores de risco ocupacionais como ortostatismo prolongado.</li>
+            <li>Queixa principal e duração, nas palavras do paciente.</li>
+          </ul>
+          <h4>História da doença atual</h4>
+          <ul>
+            <li>Caracterize a dor segundo localização, qualidade, intensidade, irradiação, fatores de melhora e piora e relação com o esforço.</li>
+            <li>Diferencie a claudicação intermitente, que cede ao repouso, da dor isquêmica de repouso, que piora com a elevação do membro.</li>
+            <li>Investigue edema, alterações de cor e temperatura, feridas, prurido e sensação de peso.</li>
+          </ul>
+          <h4>Antecedentes e hábitos</h4>
+          <ul>
+            <li>Tabagismo, diabetes, hipertensão, dislipidemia, trombofilias e história familiar de doença vascular ou tromboembolismo.</li>
+            <li>Cirurgias prévias, imobilizações, uso de anticoncepcional ou terapia hormonal e episódios pregressos de trombose.</li>
+          </ul>
+          <div class="callout callout--key"><b>Ponto-chave.</b> A distinção entre dor de origem arterial, venosa, linfática ou neuropática começa na anamnese e orienta toda a investigação subsequente.</div>
+        </div>
+      </div>
+
+      <div data-content="2">
+        <div class="epanel__head"><span class="epanel__num">02</span><div><h3>Exame físico</h3><span class="epanel__verb">Descreva</span></div></div>
+        <div class="epanel__body">
+          <p><b>Descreva</b> o exame do geral ao específico, valorizando a semiologia vascular dirigida.</p>
+          <h4>Geral, sinais vitais e antropometria</h4>
+          <ul>
+            <li>Estado geral, sinais vitais e índice de massa corporal.</li>
+            <li>Inspeção de pele e fâneros, à procura de palidez, cianose, eritema, hiperpigmentação, atrofia e perda de pelos.</li>
+          </ul>
+          <h4>Semiologia arterial</h4>
+          <ul>
+            <li>Palpação comparativa e simétrica dos pulsos femoral, poplíteo, tibial posterior e pedioso, graduando a amplitude.</li>
+            <li>Ausculta de sopros nas artérias carótidas, abdominal, ilíacas e femorais.</li>
+            <li>Avaliação de temperatura, tempo de enchimento capilar e teste de Allen na avaliação da mão.</li>
+            <li>Aferição do índice tornozelo-braço, conforme a ferramenta da seção seguinte.</li>
+          </ul>
+          <h4>Semiologia venosa e linfática</h4>
+          <ul>
+            <li>Inspeção de varizes, telangiectasias, edema, dermatite ocre e úlceras, com mensuração da circunferência das panturrilhas.</li>
+            <li>Manobras de Trendelenburg e de Perthes para avaliação do refluxo e da perviedade do sistema profundo.</li>
+            <li>Pesquisa do sinal de Stemmer e da consistência do edema na suspeita de linfedema.</li>
+          </ul>
+          <div class="callout callout--tip">A palpação comparativa de pulsos e a ausculta de sopros são gestos de baixo custo e alto rendimento. A assimetria é, com frequência, o primeiro dado objetivo da doença arterial.</div>
+        </div>
+      </div>
+
+      <div data-content="3">
+        <div class="epanel__head"><span class="epanel__num">03</span><div><h3>Hipóteses diagnósticas</h3><span class="epanel__verb">Liste</span></div></div>
+        <div class="epanel__body">
+          <p><b>Liste</b> as hipóteses ordenadas por verossimilhança, articulando os três planos do diagnóstico vascular.</p>
+          <h4>Tríade do diagnóstico</h4>
+          <ul>
+            <li><b>Sindrômica.</b> Que síndrome o quadro configura, como isquemia arterial crônica, insuficiência venosa crônica ou trombose venosa profunda.</li>
+            <li><b>Anatômica.</b> Qual território e segmento vascular está acometido, do aortoilíaco ao infrapatelar, do sistema superficial ao profundo.</li>
+            <li><b>Etiológica.</b> Qual mecanismo subjacente, aterosclerótico, trombótico, embólico, inflamatório, degenerativo ou funcional.</li>
+          </ul>
+          <div class="callout callout--key"><b>Distinção essencial.</b> As hipóteses diagnósticas constituem o conjunto de probabilidades pré-teste, ordenadas da mais para a menos provável. Não confunda esta etapa com o diagnóstico diferencial do eixo seguinte, que é o exercício sistemático de exclusão dessas mesmas hipóteses.</div>
+        </div>
+      </div>
+
+      <div data-content="4">
+        <div class="epanel__head"><span class="epanel__num">04</span><div><h3>Diagnóstico diferencial</h3><span class="epanel__verb">Justifique</span></div></div>
+        <div class="epanel__body">
+          <p><b>Justifique</b> a inclusão e a exclusão de cada possibilidade, percorrendo uma taxonomia etiológica que reduz o risco de fechamento diagnóstico prematuro.</p>
+          <h4>Categorias a percorrer</h4>
+          <ul>
+            <li>Vascular arterial, vascular venosa e linfática.</li>
+            <li>Infecciosa e inflamatória, incluindo erisipela, celulite e vasculites.</li>
+            <li>Traumática, neoplásica e iatrogênica.</li>
+            <li>Metabólica e endócrina, com destaque para o pé diabético.</li>
+            <li>Degenerativa, congênita e funcional, como o fenômeno de Raynaud.</li>
+            <li>Neuropática e musculoesquelética, frequentes simuladoras de claudicação.</li>
+          </ul>
+          <div class="callout callout--tip">O diferencial bem conduzido confronta cada hipótese pré-teste com os achados e define quais exames têm maior poder de discriminação no caso concreto.</div>
+        </div>
+      </div>
+
+      <div data-content="5">
+        <div class="epanel__head"><span class="epanel__num">05</span><div><h3>Exames complementares</h3><span class="epanel__verb">Indique</span></div></div>
+        <div class="epanel__body">
+          <p><b>Indique</b> os exames de forma hierarquizada, do menos para o mais invasivo, sempre vinculados a uma hipótese a confirmar ou afastar.</p>
+          <h4>Avaliação funcional e laboratorial</h4>
+          <ul>
+            <li>Índice tornozelo-braço e índice hálux-braço, glicemia, hemoglobina glicada, perfil lipídico, função renal, hemograma e coagulograma.</li>
+            <li>D-dímero como teste de exclusão na suspeita de trombose venosa, interpretado conforme a probabilidade pré-teste.</li>
+          </ul>
+          <h4>Imagem</h4>
+          <ul>
+            <li>Ecografia com Doppler como primeira linha para sistema arterial e venoso.</li>
+            <li>Angiotomografia e angiorressonância para mapeamento anatômico pré-intervenção.</li>
+            <li>Arteriografia, reservada à confirmação e ao planejamento terapêutico endovascular.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div data-content="6">
+        <div class="epanel__head"><span class="epanel__num">06</span><div><h3>Conduta</h3><span class="epanel__verb">Estruture</span></div></div>
+        <div class="epanel__body">
+          <p><b>Estruture</b> a conduta em três tempos, atribuindo a cada medida um profissional responsável, um prazo e um critério de reavaliação.</p>
+          <h4>Conduta inicial</h4>
+          <ul>
+            <li>Estabilização, analgesia, controle de fatores de risco e medidas de proteção do membro.</li>
+          </ul>
+          <h4>Conduta definitiva</h4>
+          <ul>
+            <li>Terapia clínica baseada em evidências, conforme as diretrizes vigentes, com indicação de revascularização endovascular ou cirúrgica quando pertinente.</li>
+          </ul>
+          <h4>Conduta de suporte</h4>
+          <ul>
+            <li>Cuidados com feridas, terapia compressiva, reabilitação, educação do paciente e adesão.</li>
+          </ul>
+          <div class="callout callout--key"><b>Boa prática.</b> Registrar quem executa, em que prazo e quando reavaliar transforma a prescrição em um plano de cuidado auditável, e não em uma lista de intenções.</div>
+        </div>
+      </div>
+
+      <div data-content="7">
+        <div class="epanel__head"><span class="epanel__num epanel__num--env">07</span><div><h3>Prevenção e seguimento</h3><span class="epanel__verb">Apresente</span></div></div>
+        <div class="epanel__body">
+          <p><b>Apresente</b> as medidas que reduzem incidência, recorrência e progressão, com cronograma de retornos.</p>
+          <ul>
+            <li>Cessação do tabagismo, controle glicêmico e pressórico, terapia antiplaquetária e com estatina quando indicadas.</li>
+            <li>Programa de exercício supervisionado na doença arterial periférica e terapia compressiva mantida na doença venosa.</li>
+            <li>Inspeção periódica dos pés no paciente diabético e educação para reconhecimento precoce de sinais de alarme.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div data-content="8">
+        <div class="epanel__head"><span class="epanel__num epanel__num--env">08</span><div><h3>Discussão didática</h3><span class="epanel__verb">Aprofunde</span></div></div>
+        <div class="epanel__body">
+          <p><b>Aprofunde</b> os mecanismos e as repercussões, conectando ciência básica e prática.</p>
+          <ul>
+            <li>Fisiopatologia do quadro e sua tradução nos achados de exame.</li>
+            <li>Armadilhas diagnósticas e fechamento prematuro, com a frequência comparada das hipóteses na população de referência.</li>
+            <li>Impacto funcional, ocupacional e psicossocial, incluindo qualidade de vida e custo do cuidado.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div data-content="9">
+        <div class="epanel__head"><span class="epanel__num epanel__num--env">09</span><div><h3>Interação multidisciplinar</h3><span class="epanel__verb">Identifique</span></div></div>
+        <div class="epanel__body">
+          <p><b>Identifique</b> os pontos de articulação do cuidado, detalhados na seção Equipe.</p>
+          <p>A medicina vascular é, por natureza, um trabalho de equipe. O reconhecimento precoce de quando e a quem encaminhar é, em si, uma competência clínica.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FERRAMENTAS ============ -->
+<section id="ferramentas" aria-labelledby="ferr-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Ferramentas à beira do leito</span>
+      <h2 id="ferr-h">Cálculo clínico interativo</h2>
+      <p>Instrumentos que convertem o exame em medidas objetivas. Os valores são calculados localmente, sem envio de dados, e servem ao ensino, não substituindo o julgamento clínico.</p>
+    </div>
+
+    <div class="tools-grid">
+
+      <!-- ITB -->
+      <div class="tool">
+        <div class="tool__head"><h3>Índice tornozelo-braço</h3><span class="tool__tag">ITB / ABI</span></div>
+        <p class="tool__desc">Razão entre a maior pressão sistólica do tornozelo e a maior pressão sistólica braquial, por membro.</p>
+        <div class="row2">
+          <div class="field"><label for="ank">Tornozelo (mmHg)</label><input id="ank" type="number" inputmode="numeric" placeholder="120" min="0" max="300"></div>
+          <div class="field"><label for="bra">Braço (mmHg)</label><input id="bra" type="number" inputmode="numeric" placeholder="130" min="0" max="300"></div>
+        </div>
+        <div class="readout">
+          <div class="readout__val mono" id="abiVal">—</div>
+          <div class="readout__lab">Razão tornozelo / braço</div>
+          <span class="badge is-neutral" id="abiBadge">Informe as duas pressões</span>
+        </div>
+      </div>
+
+      <!-- WELLS -->
+      <div class="tool">
+        <div class="tool__head"><h3>Escore de Wells para TVP</h3><span class="tool__tag">probabilidade pré-teste</span></div>
+        <p class="tool__desc">Marque os achados presentes. O escore estima a probabilidade pré-teste de trombose venosa profunda.</p>
+        <div class="check-list" id="wells"></div>
+        <div class="readout">
+          <div class="readout__val mono" id="wellsVal">0</div>
+          <div class="readout__lab">Pontuação total</div>
+          <span class="badge is-normal" id="wellsBadge">TVP improvável</span>
+        </div>
+      </div>
+
+      <!-- CEAP -->
+      <div class="tool">
+        <div class="tool__head"><h3>Classe clínica CEAP</h3><span class="tool__tag">doença venosa crônica</span></div>
+        <p class="tool__desc">Selecione a classe clínica observada para visualizar a definição correspondente.</p>
+        <div class="field">
+          <label for="ceap">Classe clínica (C)</label>
+          <select id="ceap">
+            <option value="">Selecione</option>
+            <option value="0">C0</option>
+            <option value="1">C1</option>
+            <option value="2">C2</option>
+            <option value="3">C3</option>
+            <option value="4">C4</option>
+            <option value="5">C5</option>
+            <option value="6">C6</option>
+          </select>
+        </div>
+        <div class="readout">
+          <div class="readout__val mono" id="ceapCode">C—</div>
+          <div class="readout__lab" id="ceapDesc">Aguardando seleção</div>
+        </div>
+      </div>
+
+      <!-- HÁLUX -->
+      <div class="tool">
+        <div class="tool__head"><h3>Leitura rápida do ITB</h3><span class="tool__tag">interpretação</span></div>
+        <p class="tool__desc">Faixas de interpretação do índice tornozelo-braço adotadas pela diretriz ACC/AHA de 2024.</p>
+        <table>
+          <thead><tr><th>Faixa</th><th>Interpretação</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">&gt; 1,40</td><td>Artérias incompressíveis, sugere calcificação medial</td></tr>
+            <tr><td class="mono">1,00 a 1,40</td><td>Normal</td></tr>
+            <tr><td class="mono">0,91 a 0,99</td><td>Limítrofe</td></tr>
+            <tr><td class="mono">&le; 0,90</td><td>Doença arterial periférica</td></tr>
+            <tr><td class="mono">&le; 0,40</td><td>Doença grave, isquemia avançada</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ ESCALAS ============ -->
+<section id="escalas" aria-labelledby="esc-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Escalas de referência</span>
+      <h2 id="esc-h">Classificações validadas da especialidade</h2>
+      <p>Instrumentos consagrados para padronizar a descrição da gravidade. As referências numeradas remetem à lista bibliográfica ao final.</p>
+    </div>
+
+    <div class="refscale">
+      <div class="refscale__h"><h3>Fontaine e Rutherford &middot; doença arterial periférica</h3><a class="ref-pill" href="#referencias">ref. 3</a></div>
+      <table>
+        <thead><tr><th>Fontaine</th><th>Quadro clínico</th><th>Rutherford</th></tr></thead>
+        <tbody>
+          <tr><td><span class="code">I</span></td><td>Assintomático</td><td><span class="codev">Categoria 0</span></td></tr>
+          <tr><td><span class="code">IIa</span></td><td>Claudicação leve, acima de 200 metros</td><td><span class="codev">Categoria 1</span></td></tr>
+          <tr><td><span class="code">IIb</span></td><td>Claudicação moderada a grave, abaixo de 200 metros</td><td><span class="codev">Categorias 2 e 3</span></td></tr>
+          <tr><td><span class="code">III</span></td><td>Dor isquêmica de repouso</td><td><span class="codev">Categoria 4</span></td></tr>
+          <tr><td><span class="code">IV</span></td><td>Úlcera ou gangrena, perda tecidual</td><td><span class="codev">Categorias 5 e 6</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="refscale">
+      <div class="refscale__h"><h3>CEAP clínico &middot; doença venosa crônica</h3><a class="ref-pill" href="#referencias">ref. 1</a></div>
+      <table>
+        <thead><tr><th>Classe</th><th>Definição</th></tr></thead>
+        <tbody>
+          <tr><td><span class="codev">C0</span></td><td>Sem sinais visíveis ou palpáveis de doença venosa</td></tr>
+          <tr><td><span class="codev">C1</span></td><td>Telangiectasias ou veias reticulares</td></tr>
+          <tr><td><span class="codev">C2</span></td><td>Veias varicosas, com C2r para recorrentes</td></tr>
+          <tr><td><span class="codev">C3</span></td><td>Edema</td></tr>
+          <tr><td><span class="codev">C4</span></td><td>Alterações cutâneas, com C4a, C4b e C4c para corona phlebectatica</td></tr>
+          <tr><td><span class="codev">C5</span></td><td>Úlcera venosa cicatrizada</td></tr>
+          <tr><td><span class="codev">C6</span></td><td>Úlcera venosa ativa, com C6r para recorrente</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASO MODELO ============ -->
+<section id="caso" aria-labelledby="caso-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Âncora cognitiva</span>
+      <h2 id="caso-h">Caso clínico modelo</h2>
+      <p>Um exemplar resolvido demonstra o produto esperado de cada eixo antes que o estudante aplique o roteiro de forma autônoma.</p>
+    </div>
+
+    <details class="case">
+      <summary><span class="step__num">Ex</span><h3>Claudicação intermitente em homem de 64 anos</h3><span class="step__chev" aria-hidden="true" style="margin-left:auto">▾</span></summary>
+      <div class="case__body">
+        <h4>01 &middot; Anamnese</h4>
+        <p>Homem de 64 anos, pedreiro aposentado, tabagista de 40 anos-maço e diabético, relata dor em panturrilha direita que surge após cerca de 150 metros de caminhada e cede com o repouso, há oito meses, em piora progressiva. Nega dor de repouso e feridas.</p>
+        <h4>02 &middot; Exame físico</h4>
+        <div class="vitals">
+          <span class="vital">PA 148/88 mmHg</span><span class="vital">IMC 27,4</span><span class="vital">Pulso pedioso D ausente</span><span class="vital">Pele fria, rarefação de pelos</span>
+        </div>
+        <p>Pulsos femoral e poplíteo direitos reduzidos, tibial posterior e pedioso direitos ausentes. Membro contralateral com pulsos amplos. Sopro femoral à direita.</p>
+        <h4>03 &middot; Hipóteses diagnósticas</h4>
+        <p>Sindrômica: isquemia arterial crônica dos membros inferiores. Anatômica: território femoropoplíteo direito. Etiológica: aterosclerose obliterante.</p>
+        <h4>04 &middot; Diagnóstico diferencial</h4>
+        <p>Afastadas claudicação neurogênica por estenose de canal, que não cede prontamente ao repouso, e insuficiência venosa, cujo desconforto piora com o ortostatismo e melhora com a elevação.</p>
+        <h4>05 &middot; Exames complementares</h4>
+        <p>Índice tornozelo-braço direito de 0,62, compatível com doença arterial periférica. Ecografia com Doppler confirma estenose femoral superficial. Glicemia e perfil lipídico para controle de risco.</p>
+        <h4>06 &middot; Conduta</h4>
+        <p>Inicial: cessação do tabagismo e analgesia. Definitivo: antiplaquetário, estatina, controle glicêmico e pressórico, programa de exercício supervisionado, com avaliação de revascularização se houver refratariedade. Suporte: educação e cuidado dos pés.</p>
+        <h4>07 &middot; Prevenção e seguimento</h4>
+        <p>Reavaliação em 90 dias com novo índice tornozelo-braço e teste de caminhada. Inspeção periódica dos pés pela condição diabética.</p>
+        <h4>08 &middot; Discussão didática</h4>
+        <p>O índice de 0,62 traduz objetivamente a estenose hemodinamicamente significativa. A armadilha frequente é atribuir a dor à idade ou à coluna, retardando o diagnóstico.</p>
+        <h4>09 &middot; Interação multidisciplinar</h4>
+        <p>Cirurgia vascular, endocrinologia, enfermagem, educação física e fisioterapia, em cuidado coordenado.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ RUBRICA ============ -->
+<section id="rubrica" aria-labelledby="rub-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Metacognição</span>
+      <h2 id="rub-h">Matriz de autoavaliação</h2>
+      <p>Verifique a completude do seu raciocínio. Marque cada critério cumprido para acompanhar o progresso.</p>
+    </div>
+    <div class="rubric">
+      <div class="check-list" id="rubric"></div>
+      <div class="meter"><div class="meter__fill" id="rubFill"></div></div>
+      <div class="meter__txt"><span id="rubTxt">0 de 9 critérios</span><span id="rubPct">0%</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPETÊNCIAS ============ -->
+<section id="competencias" aria-labelledby="comp-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Objetivos de aprendizagem</span>
+      <h2 id="comp-h">Competências esperadas</h2>
+      <p>Objetivos redigidos como competências observáveis, distribuídos nos três domínios, em alinhamento com as Diretrizes Curriculares Nacionais do curso de Medicina.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp">
+        <span class="dom">Domínio cognitivo</span>
+        <h3>Saber</h3>
+        <ul>
+          <li>Diferenciar dor de origem arterial, venosa, linfática e neuropática a partir da anamnese.</li>
+          <li>Explicar a fisiopatologia das principais síndromes vasculares.</li>
+          <li>Selecionar exames complementares conforme a probabilidade pré-teste.</li>
+        </ul>
+      </div>
+      <div class="comp">
+        <span class="dom">Domínio procedimental</span>
+        <h3>Saber fazer</h3>
+        <ul>
+          <li>Executar a palpação comparativa de pulsos e a ausculta de sopros.</li>
+          <li>Aferir e interpretar o índice tornozelo-braço.</li>
+          <li>Aplicar as classificações CEAP, Fontaine e Rutherford ao caso concreto.</li>
+        </ul>
+      </div>
+      <div class="comp">
+        <span class="dom">Domínio atitudinal</span>
+        <h3>Saber ser</h3>
+        <ul>
+          <li>Comunicar o diagnóstico e o plano com clareza e empatia.</li>
+          <li>Reconhecer os limites da própria atuação e encaminhar oportunamente.</li>
+          <li>Considerar o impacto psicossocial e a qualidade de vida do paciente.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EQUIPE ============ -->
+<section id="equipe" aria-labelledby="eq-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Cuidado coordenado</span>
+      <h2 id="eq-h">Interação multidisciplinar</h2>
+      <p>Reconhecer quando e a quem encaminhar é uma competência clínica. Abaixo, os principais parceiros do cuidado vascular.</p>
+    </div>
+    <h4 style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--arterial)">Especialidades médicas</h4>
+    <div class="chips" style="margin-bottom:18px">
+      <span class="chip">Cardiologia</span><span class="chip">Endocrinologia</span><span class="chip">Nefrologia</span><span class="chip">Radiologia intervencionista</span><span class="chip">Dermatologia</span><span class="chip">Infectologia</span><span class="chip">Reumatologia</span><span class="chip">Geriatria</span><span class="chip">Cirurgia plástica</span>
+    </div>
+    <h4 style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--venous)">Profissões da saúde</h4>
+    <div class="chips chips--alt">
+      <span class="chip">Enfermagem e estomaterapia</span><span class="chip">Fisioterapia</span><span class="chip">Educação física</span><span class="chip">Nutrição</span><span class="chip">Psicologia</span><span class="chip">Farmácia clínica</span><span class="chip">Serviço social</span><span class="chip">Podologia</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ATLAS ============ -->
+<section id="atlas" aria-labelledby="at-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Acervo esquemático</span>
+      <h2 id="at-h">Atlas didático</h2>
+      <p>Esquemas originais dos três sistemas vasculares do membro inferior, cada um com legenda descritiva e texto alternativo.</p>
+    </div>
+    <div class="atlas">
+
+      <figure class="plate">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Esquema do sistema arterial do membro inferior, com a artéria femoral ramificando em poplítea, tibial anterior e posterior até o arco pedioso.">
+          <rect width="200" height="200" fill="var(--surface-2)"/>
+          <path d="M100 18 C100 60 96 70 95 95 C93 120 90 150 86 184" fill="none" stroke="#A81B33" stroke-width="4" stroke-linecap="round"/>
+          <path d="M95 95 C108 110 112 140 116 184" fill="none" stroke="#A81B33" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M95 95 C82 112 80 140 78 168" fill="none" stroke="#C9445A" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="100" cy="18" r="4" fill="#A81B33"/>
+          <circle cx="86" cy="184" r="3.4" fill="#A81B33"/>
+          <circle cx="116" cy="184" r="3.4" fill="#A81B33"/>
+        </svg>
+        <figcaption><b>Sistema arterial</b><span>Eixo femoropoplíteo e ramos tibiais, território da claudicação e da isquemia crônica.</span></figcaption>
+      </figure>
+
+      <figure class="plate">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Esquema do sistema venoso do membro inferior, distinguindo as veias superficiais safena magna e parva do sistema venoso profundo, conectadas por veias perfurantes.">
+          <rect width="200" height="200" fill="var(--surface-2)"/>
+          <path d="M76 18 C74 70 72 130 70 184" fill="none" stroke="#1C5560" stroke-width="4" stroke-linecap="round"/>
+          <path d="M120 40 C124 90 122 140 126 184" fill="none" stroke="#2E7C88" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 7"/>
+          <path d="M76 70 L120 78 M72 120 L124 126 M71 160 L126 164" stroke="#9DB6BB" stroke-width="2"/>
+          <circle cx="76" cy="18" r="4" fill="#1C5560"/>
+        </svg>
+        <figcaption><b>Sistema venoso</b><span>Sistemas superficial e profundo unidos por perfurantes, base anatômica do CEAP.</span></figcaption>
+      </figure>
+
+      <figure class="plate">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Esquema da drenagem linfática do membro inferior, com vasos linfáticos ascendentes convergindo para os linfonodos inguinais.">
+          <rect width="200" height="200" fill="var(--surface-2)"/>
+          <path d="M88 184 C86 150 84 120 90 90 C95 64 98 50 100 44" fill="none" stroke="#2E7C88" stroke-width="2.6" stroke-dasharray="2 5"/>
+          <path d="M112 184 C114 150 116 120 110 90 C105 64 102 50 100 44" fill="none" stroke="#2E7C88" stroke-width="2.6" stroke-dasharray="2 5"/>
+          <g fill="#1C5560"><circle cx="92" cy="48" r="5"/><circle cx="108" cy="48" r="5"/><circle cx="100" cy="38" r="5"/></g>
+        </svg>
+        <figcaption><b>Drenagem linfática</b><span>Vasos ascendentes e linfonodos inguinais, território do linfedema.</span></figcaption>
+      </figure>
+
+    </div>
+    <p class="atlas-note">Esquemas autorais de natureza didática. Toda figura adicionada a este acervo deve registrar autoria, fonte e licença de uso, em observância à legislação de direito autoral.</p>
+  </div>
+</section>
+
+<!-- ============ DISCLOSURE + REFERÊNCIAS ============ -->
+<section id="referencias" aria-labelledby="ref-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Transparência e fontes</span>
+      <h2 id="ref-h">Nota de transparência e referências</h2>
+    </div>
+
+    <div class="disclosure">
+      <b>Declaração de uso de inteligência artificial.</b> Este material didático foi elaborado com apoio de inteligência artificial na estruturação, na redação e na verificação de referências. O conteúdo clínico foi revisado por profissional médico responsável. As decisões diagnósticas e terapêuticas em situação real devem fundamentar-se no julgamento clínico e nas diretrizes vigentes.
+    </div>
+
+    <ol class="reflist">
+      <li>Lurie F, Passman M, Meisner M, Dalsing M, Masuda E, Welch H, et al. The 2020 update of the CEAP classification system and reporting standards. J Vasc Surg Venous Lymphat Disord. 2020;8(3):342-352. doi:10.1016/j.jvsv.2019.12.075. Disponível em: <a href="https://doi.org/10.1016/j.jvsv.2019.12.075">https://doi.org/10.1016/j.jvsv.2019.12.075</a></li>
+      <li>Wells PS, Anderson DR, Rodger M, Forgie M, Kearon C, Dreyer J, et al. Evaluation of D-dimer in the diagnosis of suspected deep-vein thrombosis. N Engl J Med. 2003;349(13):1227-1235. doi:10.1056/NEJMoa023153. Disponível em: <a href="https://doi.org/10.1056/NEJMoa023153">https://doi.org/10.1056/NEJMoa023153</a></li>
+      <li>Rutherford RB, Baker JD, Ernst C, Johnston KW, Porter JM, Ahn S, et al. Recommended standards for reports dealing with lower extremity ischemia: revised version. J Vasc Surg. 1997;26(3):517-538. doi:10.1016/S0741-5214(97)70045-4. Disponível em: <a href="https://doi.org/10.1016/S0741-5214(97)70045-4">https://doi.org/10.1016/S0741-5214(97)70045-4</a></li>
+      <li>Gornik HL, Aronow HD, Goodney PP, Arya S, Brewster LP, Byrd L, et al. 2024 ACC/AHA/AACVPR/APMA/ABC/SCAI/SVM/SVN/SVS/SIR/VESS guideline for the management of lower extremity peripheral artery disease. Circulation. 2024;149(24):e1313-e1410. doi:10.1161/CIR.0000000000001251. Disponível em: <a href="https://doi.org/10.1161/CIR.0000000000001251">https://doi.org/10.1161/CIR.0000000000001251</a></li>
+      <li>Fontaine R, Kim M, Kieny R. Die chirurgische Behandlung der peripheren Durchblutungsstörungen. Helv Chir Acta. 1954;21(5-6):499-533. Referência histórica, anterior ao sistema de identificadores digitais.</li>
+      <li>Wagner FW Jr. The dysvascular foot: a system for diagnosis and treatment. Foot Ankle. 1981;2(2):64-122. Referência histórica para a classificação do pé diabético.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="foot__brand">
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#14202B"/>
+        <path d="M5 17h4l2-6 3 11 3-13 2.5 8H27" stroke="#E03651" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <b>Usina de Pesquisa</b>
+        <small>Estruturando e sistematizando a realidade</small>
+      </div>
+    </div>
+    <small>
+      Raciocínio Clínico em Medicina Vascular<br>
+      Autoria: Aldemar Araujo Castro &middot; UNCISAL, Maceió<br>
+      Material didático para graduação em Medicina &middot; uso educacional<br>
+      usinadepesquisa.com
+    </small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- ITB / ABI ----------
+  var ank=document.getElementById('ank'),bra=document.getElementById('bra');
+  var abiVal=document.getElementById('abiVal'),abiBadge=document.getElementById('abiBadge');
+  function classifyABI(v){
+    if(v>1.40) return ['Artérias incompressíveis','is-warn'];
+    if(v>=1.00) return ['Normal','is-normal'];
+    if(v>=0.91) return ['Limítrofe','is-warn'];
+    if(v>0.40)  return ['Doença arterial periférica','is-alert'];
+    return ['Isquemia grave','is-alert'];
+  }
+  function calcABI(){
+    var a=parseFloat(ank.value),b=parseFloat(bra.value);
+    if(!a||!b||b<=0){abiVal.textContent='—';abiBadge.className='badge is-neutral';abiBadge.textContent='Informe as duas pressões';return;}
+    var r=a/b;abiVal.textContent=r.toFixed(2).replace('.',',');
+    var c=classifyABI(r);abiBadge.className='badge '+c[1];abiBadge.textContent=c[0];
+  }
+  ank.addEventListener('input',calcABI);bra.addEventListener('input',calcABI);
+
+  // ---------- WELLS ----------
+  var wellsItems=[
+    ['Câncer ativo, em tratamento nos últimos 6 meses ou paliativo',1],
+    ['Paralisia, paresia ou imobilização recente do membro inferior',1],
+    ['Acamado por 3 dias ou mais, ou cirurgia de grande porte nas últimas 12 semanas',1],
+    ['Dor à palpação ao longo do trajeto do sistema venoso profundo',1],
+    ['Edema de todo o membro inferior',1],
+    ['Panturrilha mais de 3 cm maior que a do lado assintomático',1],
+    ['Edema depressível confinado ao membro sintomático',1],
+    ['Veias colaterais superficiais não varicosas',1],
+    ['Trombose venosa profunda previamente documentada',1],
+    ['Diagnóstico alternativo tão ou mais provável que TVP',-2]
+  ];
+  var wellsBox=document.getElementById('wells');
+  wellsItems.forEach(function(it,i){
+    var l=document.createElement('label');l.className='check-item';l.setAttribute('tabindex','-1');
+    var pts=(it[1]>0?'+':'')+it[1];
+    l.innerHTML='<input type="checkbox" data-pts="'+it[1]+'"><span>'+it[0]+'</span><span class="pts">'+pts+'</span>';
+    wellsBox.appendChild(l);
+  });
+  var wellsVal=document.getElementById('wellsVal'),wellsBadge=document.getElementById('wellsBadge');
+  wellsBox.addEventListener('change',function(){
+    var s=0;wellsBox.querySelectorAll('input:checked').forEach(function(c){s+=parseInt(c.dataset.pts,10);});
+    wellsVal.textContent=s;
+    var lab,cls;
+    if(s>=2){lab='TVP provável';cls='is-alert';}
+    else{lab='TVP improvável';cls='is-normal';}
+    wellsBadge.className='badge '+cls;wellsBadge.textContent=lab+' (corte ≥ 2)';
+  });
+
+  // ---------- CEAP ----------
+  var ceapDefs={
+    '0':['C0','Sem sinais visíveis ou palpáveis de doença venosa'],
+    '1':['C1','Telangiectasias ou veias reticulares'],
+    '2':['C2','Veias varicosas, C2r se recorrentes'],
+    '3':['C3','Edema'],
+    '4':['C4','Alterações cutâneas, incluindo pigmentação, eczema e lipodermatosclerose'],
+    '5':['C5','Úlcera venosa cicatrizada'],
+    '6':['C6','Úlcera venosa ativa, C6r se recorrente']
+  };
+  var ceapSel=document.getElementById('ceap'),ceapCode=document.getElementById('ceapCode'),ceapDesc=document.getElementById('ceapDesc');
+  ceapSel.addEventListener('change',function(){
+    var d=ceapDefs[ceapSel.value];
+    if(d){ceapCode.textContent=d[0];ceapDesc.textContent=d[1];}
+    else{ceapCode.textContent='C—';ceapDesc.textContent='Aguardando seleção';}
+  });
+
+  // ---------- RUBRICA ----------
+  var crit=[
+    'Anamnese completa, com sintomas qualificados e cronologia',
+    'Exame físico com semiologia vascular dirigida',
+    'Hipóteses ordenadas pela tríade sindrômica, anatômica e etiológica',
+    'Diagnóstico diferencial justificado por categorias',
+    'Exames complementares vinculados a hipóteses',
+    'Conduta em três tempos, com responsável, prazo e reavaliação',
+    'Plano de prevenção e seguimento definido',
+    'Discussão da fisiopatologia, armadilhas e impacto psicossocial',
+    'Articulação multidisciplinar explicitada'
+  ];
+  var rb=document.getElementById('rubric'),rbFill=document.getElementById('rubFill'),rbTxt=document.getElementById('rubTxt'),rbPct=document.getElementById('rubPct');
+  crit.forEach(function(c){
+    var l=document.createElement('label');l.className='check-item';
+    l.innerHTML='<input type="checkbox"><span>'+c+'</span>';
+    rb.appendChild(l);
+  });
+  rb.addEventListener('change',function(){
+    var total=crit.length,done=rb.querySelectorAll('input:checked').length;
+    var pct=Math.round(done/total*100);
+    rbFill.style.width=pct+'%';
+    rbTxt.textContent=done+' de '+total+' critérios';
+    rbPct.textContent=pct+'%';
+  });
+
+  // ---------- MATRIZ 3x3 / PAINEL NAVEGÁVEL ----------
+  var tabs=Array.prototype.slice.call(document.querySelectorAll('#matrix .mcard'));
+  var epanel=document.getElementById('epanel');
+  var store=document.getElementById('eixoStore');
+  function showEixo(n,focusPanel){
+    var src=store.querySelector('[data-content="'+n+'"]');
+    if(!src)return;
+    epanel.innerHTML=src.innerHTML;
+    epanel.setAttribute('aria-labelledby','tab-'+n);
+    tabs.forEach(function(t){
+      var on=t.dataset.eixo===String(n);
+      t.setAttribute('aria-selected',on?'true':'false');
+      t.tabIndex=on?0:-1;
+    });
+    if(focusPanel){epanel.focus();}
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){showEixo(t.dataset.eixo,false);});
+    t.addEventListener('keydown',function(e){
+      var cols=window.matchMedia('(max-width:520px)').matches?1:(window.matchMedia('(max-width:820px)').matches?2:3);
+      var idx=i,move=null;
+      if(e.key==='ArrowRight')move=idx+1;
+      else if(e.key==='ArrowLeft')move=idx-1;
+      else if(e.key==='ArrowDown')move=idx+cols;
+      else if(e.key==='ArrowUp')move=idx-cols;
+      else if(e.key==='Home')move=0;
+      else if(e.key==='End')move=tabs.length-1;
+      else if(e.key==='Enter'||e.key===' '){e.preventDefault();showEixo(t.dataset.eixo,true);return;}
+      else return;
+      e.preventDefault();
+      if(move<0||move>=tabs.length)return;
+      var nt=tabs[move];nt.focus();showEixo(nt.dataset.eixo,false);
+    });
+  });
+  showEixo('1',false);
+
+  // ---------- NAV ATIVO ----------
+  var links=Array.prototype.slice.call(document.querySelectorAll('.navlinks a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var id='#'+e.target.id;
+          links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')===id);});
+        }
+      });
+    },{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(s){if(s)io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>
